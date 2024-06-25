@@ -1,20 +1,20 @@
 package com.example.homework1
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.homework1.fragments.MainFragment
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.navigation.compose.rememberNavController
+import com.example.homework1.ui.Homework1Theme
 
-class MainActivity : AppCompatActivity() {
 
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, MainFragment())
-                .commit()
+        setContent {
+            Homework1Theme {
+                val navController = rememberNavController()
+                NavGraph(navController = navController)
+            }
         }
     }
-
 }

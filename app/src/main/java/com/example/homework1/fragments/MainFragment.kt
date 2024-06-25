@@ -43,16 +43,6 @@ class MainFragment : Fragment() {
         taskAdapter = TodoAdapter(
             tasks,
             onTaskClick = { todoItem ->
-                /*val bundle = Bundle().apply {
-                    putString("id_key", todoItem.id)
-                }
-                val fragment = AddFragment().apply {
-                    arguments = bundle
-                }
-                requireActivity().supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
-                    .addToBackStack(null)
-                    .commit()*/
                 todoItem.id?.let { AddFragment.newInstance(it) }?.let { changeFragment(it) }
             },
             onEndItemClick = {
