@@ -21,7 +21,7 @@ class TodoItemsRepository {
             add(
                 TodoItem(
                     id = "2",
-                    text = "Task 1",
+                    text = "Task 2",
                     importance = Importance.NORMAL,
                     deadline = Date(),
                     isDone = false,
@@ -31,17 +31,17 @@ class TodoItemsRepository {
             add(
                 TodoItem(
                     id = "3",
-                    text = "Task 1",
+                    text = "Task 3",
                     importance = Importance.NORMAL,
                     deadline = Date(),
-                    isDone = false,
+                    isDone = true,
                     createdAt = Date()
                 )
             )
             add(
                 TodoItem(
                     id = "4",
-                    text = "Task 1",
+                    text = "Task 4",
                     importance = Importance.HIGH,
                     deadline = Date(),
                     isDone = false,
@@ -51,7 +51,57 @@ class TodoItemsRepository {
             add(
                 TodoItem(
                     id = "5",
-                    text = "Task 1",
+                    text = "Task 5",
+                    importance = Importance.NORMAL,
+                    deadline = Date(),
+                    isDone = false,
+                    createdAt = Date()
+                )
+            )
+            add(
+                TodoItem(
+                    id = "6",
+                    text = "Task 5",
+                    importance = Importance.NORMAL,
+                    deadline = Date(),
+                    isDone = false,
+                    createdAt = Date()
+                )
+            )
+            add(
+                TodoItem(
+                    id = "7",
+                    text = "Task 5",
+                    importance = Importance.NORMAL,
+                    deadline = Date(),
+                    isDone = false,
+                    createdAt = Date()
+                )
+            )
+            add(
+                TodoItem(
+                    id = "8",
+                    text = "Task 5",
+                    importance = Importance.NORMAL,
+                    deadline = Date(),
+                    isDone = false,
+                    createdAt = Date()
+                )
+            )
+            add(
+                TodoItem(
+                    id = "9",
+                    text = "Task 5",
+                    importance = Importance.NORMAL,
+                    deadline = Date(),
+                    isDone = false,
+                    createdAt = Date()
+                )
+            )
+            add(
+                TodoItem(
+                    id = "10",
+                    text = "Task 5",
                     importance = Importance.NORMAL,
                     deadline = Date(),
                     isDone = false,
@@ -75,9 +125,6 @@ class TodoItemsRepository {
 
     fun deleteToDo(item: TodoItem) {
         listOfToDo.remove(item)
-    }
-    fun deleteItemByPosition(position: Int) {
-        listOfToDo.removeAt(position)
     }
 
     fun filterTodos(showCompletedTasks: Boolean): List<TodoItem> {

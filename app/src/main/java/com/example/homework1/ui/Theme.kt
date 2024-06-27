@@ -1,122 +1,79 @@
 package com.example.homework1.ui
 
+import android.app.Activity
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = BackDarkPrimary,
-    secondary = BackDarkSecondary,
-    tertiary = BackDarkElevated,
-    onPrimary = White,
-    onSecondary = White99,
-    onTertiary = White66,
+    primary = ThemeColors.Night.supportSeparator,
+    secondary = ThemeColors.Night.supportOverlay,
+    tertiary = ThemeColors.Night.blue,
+    error = ThemeColors.Night.red,
+    scrim = ThemeColors.Night.green,
+    outline = ThemeColors.Night.grayLight,
+    outlineVariant = ThemeColors.Night.gray,
+    surface = ThemeColors.Night.backPrimary,
+    background = ThemeColors.Night.backSecondary,
+    surfaceTint = ThemeColors.Night.backElevated,
+    onPrimary = ThemeColors.Night.labelPrimary,
+    onSecondary = ThemeColors.Night.labelSecondary ,
+    onTertiary = ThemeColors.Night.labelTertiary,
+    onSurfaceVariant = ThemeColors.Night.labelDisable,
 )
-
 private val LightColorScheme = lightColorScheme(
-    primary = BackLightPrimary,
-    secondary = White,
-    tertiary = White,
-    onPrimary = Black,
-    onSecondary = Black99,
-    onTertiary = Black4D,
-    background = White
-)
-
-val LocalCustomColors = staticCompositionLocalOf {
-    CustomColors(
-        supportSeparator = Color.Unspecified,
-        supportOverlay = Color.Unspecified,
-        labelPrimary = Color.Unspecified,
-        labelSecondary = Color.Unspecified,
-        labelTertiary = Color.Unspecified,
-        labelDisable = Color.Unspecified,
-        colorRed = Color.Unspecified,
-        colorGreen = Color.Unspecified,
-        colorBlue = Color.Unspecified,
-        colorGray = Color.Unspecified,
-        colorGrayLight = Color.Unspecified,
-        backPrimary = Color.Unspecified,
-        backSecondary = Color.Unspecified,
-        backElevated = Color.Unspecified,
-    )
-}
+    primary = ThemeColors.Day.supportSeparator,
+    secondary = ThemeColors.Day.supportOverlay,
+    tertiary = ThemeColors.Day.blue,
+    error = ThemeColors.Day.red,
+    scrim = ThemeColors.Day.green,
+    outline = ThemeColors.Day.grayLight,
+    outlineVariant = ThemeColors.Day.gray,
+    surface = ThemeColors.Day.backPrimary,
+    background = ThemeColors.Day.backSecondary,
+    surfaceTint = ThemeColors.Day.backElevated,
+    onPrimary = ThemeColors.Day.labelPrimary,
+    onSecondary = ThemeColors.Day.labelSecondary ,
+    onTertiary = ThemeColors.Day.labelTertiary,
+    onSurfaceVariant = ThemeColors.Day.labelDisable)
 
 @Composable
-fun Homework1Theme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
+fun ToDoAppTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),    
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit) {
+    val colorScheme = when {        
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        val context = LocalContext.current            
+            if (darkTheme) dynamicDarkColorScheme(context)
+            else dynamicLightColorScheme(context)
+    }
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+        val window = (view.context as Activity).window
+        window.statusBarColor = colorScheme.primary.toArgb()
+        WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+        }
+    }
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
-    )
-}
-
-val lightColors = CustomColors(
-    supportSeparator = Black33,
-    supportOverlay = Black0F,
-    labelPrimary = Black,
-    labelSecondary = Black99,
-    labelTertiary = Black4D,
-    labelDisable = Black26,
-    colorRed = RedLight,
-    colorGreen = GreenLight,
-    colorBlue = BlueLight,
-    colorGray = Gray,
-    colorGrayLight = GrayLight,
-    backPrimary = BackLightPrimary,
-    backSecondary = White,
-    backElevated = White
-)
-
-val darkColors = CustomColors(
-    supportSeparator = White33,
-    supportOverlay = Black52,
-    labelPrimary = White,
-    labelSecondary = White99,
-    labelTertiary = White66,
-    labelDisable = White26,
-    colorRed = RedDark,
-    colorGreen = GreenDark,
-    colorBlue = BlueDark,
-    colorGray = Gray,
-    colorGrayLight = GrayDark,
-    backPrimary = BackDarkPrimary,
-    backSecondary = BackDarkSecondary,
-    backElevated = BackDarkElevated
-)
-
-@Composable
-fun CustomTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-
-    val colors = when {
-        darkTheme -> darkColors
-        else -> lightColors
-    }
-
-    CompositionLocalProvider(
-        LocalCustomColors provides colors,
-        content = content
-    )
-}
-
-object CustomTheme {
-    val colors: CustomColors
-        @Composable
-        get() = LocalCustomColors.current
-}
+    )}

@@ -3,28 +3,31 @@ package com.example.homework1.ui
 import androidx.compose.ui.graphics.Color
 
 
-val Black = Color(0xFF000000)
-val Black26 = Color(0x26000000)
-val Black33 = Color(0x33000000)
-val Black52 = Color(52000000)
-val Black99 = Color(0x99000000)
-val Black4D = Color(0x4D000000)
-val Black0F = Color(0x0F000000)
-val White = Color(0xFFFFFFFF)
-val White26 = Color(0x26FFFFFF)
-val White33 = Color(0x33FFFFFF)
-val White66 = Color(0x66FFFFFF)
-val White99 = Color(0x99FFFFFF)
-val RedLight = Color(0xFFFF3B30)
-val RedDark = Color(0xFFFF453A)
-val GreenLight = Color(0xFF34C759)
-val GreenDark = Color(0xFF32D74B)
-val BlueLight = Color(0xFF007AFF)
-val BlueDark = Color(0xFF0A84FF)
-val Gray = Color(0xFF8E8E93)
-val GrayLight = Color(0xFFD1D1D6)
-val GrayDark = Color(0xFF48484A)
-val BackLightPrimary = Color(0xFFF7F6F2)
-val BackDarkPrimary = Color(0xFF161618)
-val BackDarkSecondary = Color(0xFF252528)
-val BackDarkElevated = Color(0xFF3C3C3F)
+sealed class ThemeColors(    val supportSeparator: Color,
+                             val supportOverlay: Color,    val labelPrimary: Color,
+                             val labelSecondary: Color,    val labelTertiary: Color,
+                             val labelDisable: Color,    val red: Color,
+                             val green: Color,    val blue: Color,
+                             val gray: Color,
+                             val grayLight: Color,    val white: Color =  Color(0xFFFFFFFF),
+                             val backPrimary: Color,    val backSecondary: Color,
+                             val backElevated: Color,){
+    object Day : ThemeColors(        supportSeparator = Color(0x33000000),
+        supportOverlay = Color(0x0F000000),        labelPrimary = Color(0xFF000000),
+        labelSecondary = Color(0x99000000),        labelTertiary = Color(0x4D000000),
+        labelDisable = Color(0x26000000),
+        red = Color(0xFFFF3B30),
+        green = Color(0xFF34C759),        blue = Color(0xFF007AFF),
+        gray = Color(0xFF8E8E93),        grayLight = Color(0xFFD1D1D6),
+        backPrimary = Color(0xFFF7F6F2),        backSecondary = Color(0xFFFFFFFF),
+        backElevated = Color(0xFFFFFFFF),    )
+    object Night : ThemeColors(
+        supportSeparator = Color(0x33FFFFFF),        supportOverlay = Color(0x52000000),
+        labelPrimary = Color(0xFFFFFFFF),        labelSecondary = Color(0x99FFFFFF),
+        labelTertiary = Color(0x66FFFFFF),        labelDisable = Color(0x26FFFFFF),
+        red = Color(0xFFFF453A),        green = Color(0xFF32D74B),
+        blue = Color(0xFF0A84FF),
+        gray = Color(0xFF8E8E93),        grayLight = Color(0xFF48484A),
+        backPrimary = Color(0xFF161618),        backSecondary = Color(0xFF252528),
+        backElevated = Color(0xFF3C3C3F),    )
+}
