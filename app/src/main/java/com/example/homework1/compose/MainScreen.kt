@@ -3,6 +3,7 @@ package com.example.homework1.compose
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -53,7 +53,6 @@ fun MainScreenContent(
 
     Scaffold(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.primary)
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
                 LargeTopAppBar(
@@ -90,8 +89,9 @@ fun MainScreenContent(
         }
     ) { paddingValues ->
         Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(8.dp)
             .background(MaterialTheme.colorScheme.primary)
-            .padding(8.dp),
             ) {
                 LazyColumn(
                     modifier = Modifier
