@@ -1,5 +1,7 @@
 package com.example.homework1
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.Date
 
@@ -113,7 +115,9 @@ class TodoItemsRepository {
 
     fun getToDoById(id: String?) = listOfToDo.firstOrNull { it.id == id }
 
-    fun getAllToDo() = listOfToDo.toList()
+    fun getAllToDo(): List<TodoItem> {
+        return listOfToDo.toList()
+    }
 
     fun addOrEditToDo(item: TodoItem) {
         if (item.id != null) {

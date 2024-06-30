@@ -28,6 +28,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -59,6 +60,7 @@ import com.example.homework1.Importance
 import com.example.homework1.R
 import com.example.homework1.TodoItem
 import com.example.homework1.TodoViewModel
+import com.example.homework1.ui.ToDoAppTheme
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -146,21 +148,20 @@ fun AddScreen(id: String?, navController: NavHostController,
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 72.dp)
                     .padding(top = 72.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color.Gray.copy(alpha = 0.1f))
-                    .padding(16.dp),
+                    .background(Color.Gray.copy(alpha = 0.1f)),
                 contentAlignment = Alignment.TopStart
             ) {
                 TextField(
-                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3,
+                    modifier = Modifier
+                        .fillMaxWidth(),
                     value = todoText,
                     onValueChange = { todoText = it },
                     placeholder = { Text("Что нужно сделать") },
                     colors = TextFieldDefaults.textFieldColors(
-                        cursorColor = Color.Blue,
-                        focusedIndicatorColor = Color.Transparent,
+                        containerColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent
                     )
                 )
@@ -187,7 +188,7 @@ fun AddScreen(id: String?, navController: NavHostController,
                         Text(
                             text = selectedImportance,
                             color = Color.Black,
-
+                            style = MaterialTheme.typography.labelSmall
                             )
                     }
                 }
@@ -308,7 +309,6 @@ fun AddScreen(id: String?, navController: NavHostController,
                 )
             }
         }
-        AddScreenContent(navController, id, viewModel)
     }
 }
 
@@ -329,197 +329,14 @@ fun getImportanceFromString(importance: String): Importance {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddScreenContent(navController: NavHostController, id: String?, viewModel: TodoViewModel) {
-
-}
 
 @Preview(showBackground = true)
 @Composable
 fun PreviewAddScreen() {
     val navController = rememberNavController()
     val viewModel = TodoViewModel()
-    AddScreen(null, navController = navController, viewModel = viewModel)
-}
-
-
-
-/*
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddScreen(navController: NavHostController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Добавить задачу") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.close),
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                actions = {
-                    TextButton(
-                        onClick = { /* Handle save action */ },
-                        modifier = Modifier.padding(end = 16.dp)
-                    ) {
-                        Text(
-                            text = "Сохранить",
-                            color = Color.Blue,
-                            fontSize = 16.sp
-                        )
-                    }
-                }
-            )
-        }
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(72.dp)
-                    .padding(vertical = 24.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.Gray.copy(alpha = 0.1f))
-                    .padding(16.dp),
-                contentAlignment = Alignment.TopStart
-            ) {
-                TextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = "", // Здесь должно быть значение из состояния
-                    onValueChange = { /* Handle text change */ },
-                    placeholder = { Text("Что нужно сделать") },
-                    colors = TextFieldDefaults.textFieldColors(
-                        cursorColor = Color.Blue,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    )
-                )
-            }
-
-            Text(
-                text = "Важность",
-                fontSize = 16.sp,
-                modifier = Modifier.padding(top = 20.dp)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Spinner на основе DropdownMenu
-            // Для примера используем DropdownMenu как Spinner
-            var expanded by remember { mutableStateOf(false) }
-            Box(modifier = Modifier.fillMaxWidth()) {
-                TextButton(
-                    onClick = { expanded = true },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Выбрать важность",
-                        color = Color.Black,
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
-                }
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier.background(CustomTheme.colors.backElevated)
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Нет", color = CustomTheme.colors.labelPrimary) },
-                        onClick = {  },
-                        modifier = Modifier.background(CustomTheme.colors.backElevated),
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Высокая", color = CustomTheme.colors.colorRed) },
-                        onClick = {  },
-                        modifier = Modifier.background(CustomTheme.colors.backElevated),
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Низкая", color = CustomTheme.colors.colorRed) },
-                        onClick = {  },
-                        modifier = Modifier.background(CustomTheme.colors.backElevated),
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "До: ",
-                    fontSize = 16.sp,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Text(
-                    text = "Дата и время",
-                    fontSize = 16.sp,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // Switch в Compose
-                Switch(
-                    checked = false, // Здесь должно быть значение из состояния
-                    onCheckedChange = { /* Handle switch state change */ },
-                    modifier = Modifier.wrapContentSize()
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Divider(color = Color.Gray, thickness = 1.dp)
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(vertical = 16.dp)
-                    .clickable(onClick = { /* Handle delete action */ })
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.delete_red),
-                    contentDescription = "Delete icon",
-                    tint = Color.Red,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Удалить",
-                    color = Color.Red,
-                    fontSize = 16.sp
-                )
-            }
-        }
+    MaterialTheme () {
+        AddScreen(null, navController = navController, viewModel = viewModel)
     }
-}
-*/
-@Composable
-fun DetailScreen(id: String, navController: NavHostController) {
-    // Your DetailScreen content
-    /*Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Детали задачи") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(painter = painterResource(id = R.drawable.close), contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) {
-        // Content goes here
-    }*/
+
 }

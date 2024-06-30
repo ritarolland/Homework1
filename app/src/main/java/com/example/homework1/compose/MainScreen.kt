@@ -1,13 +1,18 @@
 package com.example.homework1.compose
 
+import android.widget.Toast
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,44 +29,69 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.rotary.onRotaryScrollEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.homework1.Importance
 import com.example.homework1.R
 import com.example.homework1.TodoItem
 import com.example.homework1.TodoViewModel
-
+import com.example.homework1.ui.ToDoAppTheme
+import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreenContent(
     viewModel: TodoViewModel,
     navigateToAdd: (String?) -> Unit
 ) {
-    val tasks by viewModel.todos.observeAsState(emptyList())
-    val completedTasksCount by viewModel.completedTasksCount.observeAsState(0)
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    val showCompletedTasks by viewModel.showCompletedTasks.observeAsState(true)
+    val tasks by viewModel.todos.collectAsState()
+    val completedTasksCount by viewModel.completedTasksCount.collectAsState()
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val showCompletedTasks by viewModel.showCompletedTasks.collectAsState()
+    val context = LocalContext.current
+
+    val errorState = viewModel.errorFlow
+    LaunchedEffect(viewModel) {
+        viewModel.loadTodos()
+        errorState.collect {
+            if (it != null)
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     Scaffold(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.primary)
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
                 LargeTopAppBar(
-                    modifier = Modifier.background(MaterialTheme.colorScheme.primary),
-                    title = { Text(text = "Мои дела") },
+                    modifier = Modifier
+                        .animateContentSize()
+                        .background(MaterialTheme.colorScheme.surface),
+                    title = {
+                        Text(
+                            text = "Мои дела",
+                            color = MaterialTheme.colorScheme.onPrimary
+
+                    ) },
                     scrollBehavior = scrollBehavior,
                     actions = {
-                        Text(text = "Выполнено - $completedTasksCount")
+                        Text(text = "Выполнено - $completedTasksCount",
+                            color = MaterialTheme.colorScheme.onTertiary)
                         IconButton(onClick = {
                             viewModel.toggleShowCompletedTasks()
                         }) {
@@ -85,53 +115,51 @@ fun MainScreenContent(
                 modifier = Modifier
                     .clip(CircleShape)
             ) {
-                Icon(painter = painterResource(id = R.drawable.add), contentDescription = "Add")
+                Icon(
+                    painter = painterResource(id = R.drawable.add),
+                    contentDescription = "Add",
+                    tint = Color.White
+                )
             }
         }
     ) { paddingValues ->
         Box(modifier = Modifier
-            .background(MaterialTheme.colorScheme.primary)
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
             .padding(8.dp),
             ) {
                 LazyColumn(
                     modifier = Modifier
-                        .border(
-                        width = 8.dp,
-                        color = MaterialTheme.colorScheme.surfaceTint,
-                        shape = RoundedCornerShape(8.dp)
-                    ),
+                        .background(MaterialTheme.colorScheme.surfaceTint,
+                            shape = RoundedCornerShape(8.dp)),
                     contentPadding = paddingValues
                 ) {
                     items(tasks) { task ->
-                        when (task) {
-                            is TodoItem -> {
-                                var isChecked by remember { mutableStateOf(task.isDone) }
-                                Todo(
-                                    item = task,
-                                    onComplete = {
-                                        isChecked = !isChecked
-                                        task.isDone = it
+                        var isChecked by remember { mutableStateOf(task.isDone) }
+                        Todo(
+                            item = task,
+                            onComplete = {
+                                isChecked = !isChecked
+                                task.isDone = it
 
-                                        viewModel.addOrEditTodoItem(task)
+                                viewModel.addOrEditTodoItem(task)
 
-                                    },
-                                    onCardClick = {
-                                        navigateToAdd(task.id)
-                                    }
-                                    )
-
+                            },
+                            onCardClick = {
+                                navigateToAdd(task.id)
                             }
-                            else -> {
-                                Text(
-                                    text = task.toString(),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(52.dp)
-                                        .padding(horizontal = 52.dp, vertical = 8.dp)
+                        )
 
-                                )
-                            }
-                        }
+                    }
+                    item {
+                        Text(
+                            text = "Новое",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .padding(horizontal = 52.dp, vertical = 8.dp)
+
+                        )
                     }
                 }
         }
@@ -140,12 +168,20 @@ fun MainScreenContent(
 }
 
 
-
 @Preview
 @Composable
 fun PreviewMainScreen() {
-    val viewModel = TodoViewModel() // Замените на ваш ViewModel
-    // В качестве аргументов для navigateToAdd и navigateToDetails
-    // можно передать заглушки или значения по умолчанию для предварительного просмотра
-    MainScreenContent(viewModel) {}
+    val viewModel = TodoViewModel()
+    ToDoAppTheme(darkTheme = false, dynamicColor = false) {
+        MainScreenContent(viewModel = viewModel, navigateToAdd = {})
+    }
+}
+
+@Preview
+@Composable
+fun PreviewMainScreenDark() {
+    val viewModel = TodoViewModel()
+    ToDoAppTheme(darkTheme = true, dynamicColor = false) {
+        MainScreenContent(viewModel = viewModel, navigateToAdd = {})
+    }
 }

@@ -1,38 +1,48 @@
 package com.example.homework1
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class TodoViewModel : ViewModel() {
 
     private val repository = TodoItemsRepository()
-    private val _todos = MutableLiveData<List<Any>>()
-    val todos: LiveData<List<Any>> get() = _todos
-    private val _completedTasksCount = MutableLiveData<Int>()
-    val completedTasksCount: LiveData<Int> get() = _completedTasksCount
+    val _todos = MutableStateFlow<List<TodoItem>>(emptyList())
+    val todos: StateFlow<List<TodoItem>> get() = _todos
+    val _completedTasksCount = MutableStateFlow<Int>(0)
+    val completedTasksCount: StateFlow<Int> get() = _completedTasksCount
+    private val _errorFlow = MutableStateFlow<String?>(null)
+    val errorFlow: StateFlow<String?> get() = _errorFlow
 
-    private var _showCompletedTasks = MutableLiveData<Boolean>(true)
+    private var _showCompletedTasks = MutableStateFlow(true)
 
 
-    val showCompletedTasks: LiveData<Boolean>
+    val showCompletedTasks: StateFlow<Boolean>
         get() = _showCompletedTasks
 
 
-
-
     init {
-        _todos.value = repository.getAllToDo()
-        _completedTasksCount.value = repository.countOfCompleted()
-        addNewItem()
+        loadTodos()
+        updateCompletedTasksCount()
     }
-    private fun addNewItem() {
-        val currentList = _todos.value.orEmpty().toMutableList()
-        currentList.add("new")
-        _todos.value = currentList
+
+    private fun runSafeInBackground(block: suspend () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {        try {
+            block.invoke()        } catch (e: Exception) {
+            _errorFlow.value = e.message ?: "something went wrong"}
+        }}
+
+
+    fun loadTodos() {
+        runSafeInBackground {
+            _todos.value = repository.getAllToDo()
+        }
     }
 
 
@@ -42,43 +52,36 @@ class TodoViewModel : ViewModel() {
     }
 
     fun addOrEditTodoItem(todoItem: TodoItem) {
-        repository.addOrEditToDo(todoItem)
-        updateTodos()
-        _completedTasksCount.value = repository.countOfCompleted()
-        addNewItem()
+        runSafeInBackground {
+            repository.addOrEditToDo(todoItem)
+            loadTodos()
+            updateCompletedTasksCount()
+        }
     }
 
     fun removeTodoItem(todoItem: TodoItem) {
-        repository.deleteToDo(todoItem)
-        updateTodos()
-        updateCompletedTasksCount()
-        addNewItem()
+        runSafeInBackground {
+            repository.deleteToDo(todoItem)
+            updateTodos()
+            updateCompletedTasksCount()
+        }
+
     }
     private fun updateCompletedTasksCount() {
-        viewModelScope.launch {
+        runSafeInBackground {
             val count = repository.countOfCompleted()
             _completedTasksCount.value = count
         }
     }
 
-    fun checkItem(item: TodoItem, checked: Boolean) {
-        repository.checkItem(item, checked)
-        updateTodos()
-        addNewItem()
-    }
-
     fun toggleShowCompletedTasks() {
         _showCompletedTasks.value = !_showCompletedTasks.value!!
         updateTodos()
-        addNewItem()
     }
 
     private fun updateTodos() {
-        _todos.value = _showCompletedTasks.value?.let { repository.filterTodos(it) }
+        runSafeInBackground {
+            _todos.value = repository.filterTodos(_showCompletedTasks.value)
+        }
     }
-
-    fun countCompletedTasks(): Int {
-        return repository.countOfCompleted()
-    }
-
 }

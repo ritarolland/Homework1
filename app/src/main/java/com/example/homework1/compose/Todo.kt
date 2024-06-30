@@ -45,7 +45,7 @@ import com.example.homework1.Importance
 import com.example.homework1.R
 
 import com.example.homework1.TodoItem
-import com.example.homework1.ui.CustomColors
+import com.example.homework1.ui.ToDoAppTheme
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -69,8 +69,8 @@ fun Todo(
         )
     } else {
         CheckboxDefaults.colors().copy(
-            checkedBorderColor = Color.Green,
-            checkedBoxColor = Color.Green
+            checkedBorderColor = MaterialTheme.colorScheme.scrim,
+            checkedBoxColor = MaterialTheme.colorScheme.scrim
         )
     }
     Card(
@@ -143,7 +143,7 @@ fun Todo(
 @Preview
 @Composable
 fun ToDoItemBasic() {
-    MaterialTheme {
+    ToDoAppTheme(darkTheme = false, dynamicColor = false) {
         Todo(
             TodoItem(
                 id = "1",
@@ -163,7 +163,7 @@ fun ToDoItemBasic() {
 @Preview
 @Composable
 fun ToDoItemHighPriority() {
-    MaterialTheme {
+    ToDoAppTheme(darkTheme = false, dynamicColor = false) {
         Todo(
             TodoItem(
                 id = "2",
@@ -183,7 +183,7 @@ fun ToDoItemHighPriority() {
 @Preview
 @Composable
 fun ToDoItemWithDeadline() {
-    MaterialTheme {
+    ToDoAppTheme(darkTheme = false, dynamicColor = false) {
         Todo(
             TodoItem(
                 id = "1",
@@ -204,7 +204,7 @@ fun ToDoItemWithDeadline() {
 @Preview
 @Composable
 fun ToDoItemLowPriority() {
-    MaterialTheme {
+    ToDoAppTheme(darkTheme = true, dynamicColor = false) {
         Todo(
             TodoItem(
                 id = "3",
@@ -224,7 +224,7 @@ fun ToDoItemLowPriority() {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun ToDoItemLotText() {
-    MaterialTheme {
+    ToDoAppTheme(darkTheme = false, dynamicColor = false) {
         Todo(
             TodoItem(
                 id = "4",

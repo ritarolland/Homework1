@@ -1,3 +1,4 @@
+/*
 package com.example.homework1.fragments
 
 import android.annotation.SuppressLint
@@ -117,4 +118,4 @@ class MainFragment : Fragment() {
         _binding = null
     }
 
-}
+}*/
