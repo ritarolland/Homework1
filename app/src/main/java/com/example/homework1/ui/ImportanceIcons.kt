@@ -1,11 +1,11 @@
-package com.example.homework1.compose
+package com.example.homework1.ui
 
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import com.example.homework1.Importance
+import com.example.homework1.domain.models.Importance
 import com.example.homework1.R
 
 @Composable

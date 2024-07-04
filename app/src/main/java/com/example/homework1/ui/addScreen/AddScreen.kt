@@ -1,15 +1,16 @@
-package com.example.homework1.compose
+package com.example.homework1.ui.addScreen
 
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
+import android.content.Context
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,27 +19,25 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,18 +48,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.homework1.Importance
 import com.example.homework1.R
-import com.example.homework1.TodoItem
-import com.example.homework1.TodoViewModel
-import com.example.homework1.ui.ToDoAppTheme
+import com.example.homework1.domain.models.Importance
+import com.example.homework1.utils.DateFormatter
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -69,69 +67,39 @@ import java.util.Locale
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddScreen(id: String?, navController: NavHostController,
-              viewModel: TodoViewModel,) {
-
-    var todoText by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("Дата и время") }
-    var todoImportance by remember { mutableStateOf(Importance.NORMAL) }
-    var selectedImportance by remember { mutableStateOf("Нет") }
-    var todoItem : TodoItem? by remember { mutableStateOf(null) }
-    var deadline : Date? by remember { mutableStateOf(null) }
+fun AddScreen(
+    navController: NavHostController,
+    viewModel: AddScreenViewModel = hiltViewModel(),
+) {
+    val todoItem by viewModel.todoItem.collectAsState()
+    val errorMessage by viewModel.errorFlow.collectAsState()
     val context = LocalContext.current
-
-    if(id != null) {
-        todoItem = viewModel.getItemById(id)
-        if (todoItem != null) {
-            todoText = todoItem!!.text!!
-            todoImportance = todoItem!!.importance
-            selectedImportance = getStringFromImportance(todoImportance)
-            deadline = todoItem!!.deadline
-        }
-    }
+    var switchState by remember { mutableStateOf(todoItem.deadline != null) }
+    val importanceItems = stringArrayResource(R.array.importance_options)
 
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                 title = { Text("") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             painter = painterResource(id = R.drawable.close),
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.button_back)
                         )
                     }
                 },
                 actions = {
                     TextButton(
                         onClick = {
-                            var newId = "10"
-                            var createdAt = Date()
-                            var isDone = false
-                            var updatedAt : Date? = null
-                            if(id != null) {
-                                newId = id
-                                isDone = todoItem!!.isDone
-                                updatedAt = Date()
-                                createdAt = todoItem!!.createdAt
-                            }
-
-                            val todoItemNew = TodoItem(
-                                id = newId,
-                                text = todoText,
-                                importance = getImportanceFromString(selectedImportance),
-                                deadline = deadline,
-                                isDone = false,
-                                createdAt = Date(),
-                                updatedAt = null
-                            )
-                            viewModel.addOrEditTodoItem(todoItemNew)
+                            viewModel.saveItem()
                             navController.popBackStack()
                         },
                         modifier = Modifier.padding(end = 16.dp)
                     ) {
                         Text(
-                            text = "СОХРАНИТЬ",
+                            text = stringResource(id = R.string.save),
                             color = MaterialTheme.colorScheme.tertiary,
                             fontSize = 16.sp
                         )
@@ -142,6 +110,7 @@ fun AddScreen(id: String?, navController: NavHostController,
     ) {
         Column(
             modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
@@ -157,18 +126,20 @@ fun AddScreen(id: String?, navController: NavHostController,
                     minLines = 3,
                     modifier = Modifier
                         .fillMaxWidth(),
-                    value = todoText,
-                    onValueChange = { todoText = it },
-                    placeholder = { Text("Что нужно сделать") },
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                    value = todoItem.text,
+                    onValueChange = { viewModel.updateText(it) },
+                    placeholder = { Text(stringResource(id = R.string.what_to_do)) },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
                     )
                 )
             }
 
             Text(
-                text = "Важность",
+                text = stringResource(id = R.string.importance),
                 fontSize = 16.sp,
                 modifier = Modifier.padding(top = 20.dp)
             )
@@ -186,49 +157,30 @@ fun AddScreen(id: String?, navController: NavHostController,
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Text(
-                            text = selectedImportance,
+                            text = getStringFromImportance(todoItem.importance, importanceItems),
                             color = Color.Black,
                             style = MaterialTheme.typography.labelSmall
-                            )
+                        )
                     }
                 }
                 DropdownMenu(
                     expanded = expanded,
                     onDismissRequest = { expanded = false },
-                    modifier = Modifier.background(Color.Gray)
+                    modifier = Modifier.background(MaterialTheme.colorScheme.primary)
                 ) {
-                    DropdownMenuItem(
-                        text = { Text("Нет", color = Color.Black) },
-                        onClick = {
-                            selectedImportance = "Нет"
-                            expanded = false
-                        },
-                        modifier = Modifier.background(Color.Blue),
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Высокая", color = Color.Black) },
-                        onClick = {
-                            selectedImportance = "Высокая"
-                            expanded = false
-                        },
-                        modifier = Modifier
-                            .background(Color.Blue),
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Низкая", color = Color.Black) },
-                        onClick = {
-                            selectedImportance = "Низкая"
-                            expanded = false
-                        },
-                        modifier = Modifier.background(Color.Blue),
-                    )
+
+                    importanceItems.forEach { importanceText ->
+                        CreateDropdownMenuItem(
+                            importanceText,
+                            updateImportance = viewModel::updateImportance
+                        ) { expanded = it }
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val dateFormatter = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
-            Row() {
+            Row {
                 Column(
 
                     modifier = Modifier
@@ -236,13 +188,17 @@ fun AddScreen(id: String?, navController: NavHostController,
                         .heightIn()
                 ) {
                     Text(
-                        text = "Сделать до: ",
+                        text = stringResource(id = R.string.until),
                         fontSize = 16.sp,
                     )
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = date,
+                        text = if (todoItem.deadline == null) {
+                            stringResource(id = R.string.date_and_time)
+                        } else {
+                            todoItem.deadline?.let { DateFormatter.toFormat(it) } ?: ""
+                        },
                         fontSize = 16.sp,
                         color = Color.Gray.copy(alpha = 1f)
                     )
@@ -250,31 +206,29 @@ fun AddScreen(id: String?, navController: NavHostController,
                 Spacer(modifier = Modifier.weight(1f))
 
                 Switch(
-                    checked = deadline != null,
-                    onCheckedChange = { isChecked ->
-                        if (isChecked) {
-                            val calendar = Calendar.getInstance()
-                            val datePickerDialog = DatePickerDialog(
-                                context,
-                                { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-                                    calendar.set(year, month, dayOfMonth)
-                                    deadline = calendar.time
-                                },
-                                calendar.get(Calendar.YEAR),
-                                calendar.get(Calendar.MONTH),
-                                calendar.get(Calendar.DAY_OF_MONTH)
-                            )
-                            datePickerDialog.show()
+                    checked = switchState,
+                    onCheckedChange = {
+                        if (switchState) {
+                            switchState = false
+                            viewModel.updateDeadline(null)
                         } else {
-                            deadline = null
+                            switchState = true
+                            onShowDialog(
+                                context = context,
+                                onDismissRequest = {
+                                    switchState = false
+                                },
+                                updateDeadline = viewModel::updateDeadline
+                            )
                         }
-                    }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.tertiary,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.primary,
+                        checkedTrackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+                        uncheckedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                    )
                 )
-                deadline?.let {
-                    date = dateFormatter.format(it)
-                } ?: run {
-                    date = "Дата и время"
-                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -286,13 +240,10 @@ fun AddScreen(id: String?, navController: NavHostController,
                 modifier = Modifier
                     .padding(vertical = 16.dp)
                     .clickable(onClick = {
-                        if(id != null) {
-                            val todo = viewModel.getItemById(id.toString())
-                            if (todo != null) {
-                                viewModel.removeTodoItem(todo)
-                            }
+                        if (todoItem.id.isNotEmpty()) {
+                            viewModel.deleteItem()
+                            navController.popBackStack()
                         }
-                        navController.popBackStack()
                     })
             ) {
                 Icon(
@@ -303,29 +254,76 @@ fun AddScreen(id: String?, navController: NavHostController,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Удалить",
+                    text = stringResource(id = R.string.delete),
                     color = Color.Red,
                     fontSize = 16.sp
                 )
             }
         }
     }
+
+    errorMessage?.let { message ->
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        LaunchedEffect(key1 = message) {
+            viewModel.clearError()
+        }
+    }
+
 }
 
-fun getStringFromImportance(importance: Importance): String {
-    return when (importance) {
-        Importance.LOW -> "Низкая"
-        Importance.NORMAL -> "Нет"
-        Importance.HIGH -> "Высокая"
+private fun onShowDialog(
+    context: Context,
+    onDismissRequest: () -> Unit,
+    updateDeadline: (Date) -> Unit,
+) {
+    val calendar = Calendar.getInstance()
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+            calendar.set(year, month, dayOfMonth)
+            updateDeadline(calendar.time)
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
+    datePickerDialog.setOnCancelListener {
+        onDismissRequest()
+    }
+    datePickerDialog.show()
+}
+
+@Composable
+fun CreateDropdownMenuItem(
+    importanceText: String,
+    updateImportance: (Importance) -> Unit,
+    onExpandedChanged: (Boolean) -> Unit
+) {
+    val importanceItems = stringArrayResource(R.array.importance_options)
+    DropdownMenuItem(
+        text = { Text(importanceText, color = MaterialTheme.colorScheme.onPrimary) },
+        onClick = {
+            val importance = getImportanceFromText(importanceText, importanceItems)
+            updateImportance(importance)
+            onExpandedChanged(false)
+        },
+    )
+}
+
+fun getImportanceFromText(importanceText: String, importanceItems: Array<String>): Importance {
+    return when (importanceText) {
+        importanceItems[0] -> Importance.NORMAL
+        importanceItems[1] -> Importance.HIGH
+        importanceItems[2] -> Importance.LOW
+        else -> Importance.NORMAL
     }
 }
 
-fun getImportanceFromString(importance: String): Importance {
+fun getStringFromImportance(importance: Importance, importanceItems: Array<String>): String {
     return when (importance) {
-        "Низкая" -> Importance.LOW
-        "Нет" -> Importance.NORMAL
-        "Высокая" -> Importance.HIGH
-        else -> Importance.NORMAL
+        Importance.LOW -> importanceItems[2]
+        Importance.NORMAL -> importanceItems[0]
+        Importance.HIGH -> importanceItems[1]
     }
 }
 
@@ -334,9 +332,7 @@ fun getImportanceFromString(importance: String): Importance {
 @Composable
 fun PreviewAddScreen() {
     val navController = rememberNavController()
-    val viewModel = TodoViewModel()
-    MaterialTheme () {
-        AddScreen(null, navController = navController, viewModel = viewModel)
+    MaterialTheme {
+        AddScreen(navController = navController)
     }
-
 }
