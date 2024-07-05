@@ -35,7 +35,7 @@ class AddScreenViewModel @Inject constructor(
         }
     }
 
-    fun updateText(text: String){
+    fun updateText(text: String) {
         runSafeInBackground {
             _todoItem.value = todoItem.value.copy(
                 text = text
@@ -43,7 +43,7 @@ class AddScreenViewModel @Inject constructor(
         }
     }
 
-    fun updateDeadline(date: Date?){
+    fun updateDeadline(date: Date?) {
         runSafeInBackground {
             _todoItem.value = todoItem.value.copy(
                 deadline = date
@@ -51,7 +51,7 @@ class AddScreenViewModel @Inject constructor(
         }
     }
 
-    fun updateImportance(importance: Importance){
+    fun updateImportance(importance: Importance) {
         runSafeInBackground {
             _todoItem.value = todoItem.value.copy(
                 importance = importance
@@ -59,35 +59,35 @@ class AddScreenViewModel @Inject constructor(
         }
     }
 
-    fun getItemById(id: String?){
+    fun getItemById(id: String?) {
         runSafeInBackground {
-            if (id != null){
+            if (id != null) {
                 _todoItem.value = repository.getToDoById(id)
-            }
+            } else _todoItem.value = TodoItem()
         }
     }
 
-    fun saveItem(){
+    fun saveItem() {
         runSafeInBackground {
             repository.addOrEditToDo(
                 TodoItem(
                     id = todoItem.value.id.ifEmpty {
                         UUID.randomUUID().toString()
                     },
-                    text =  todoItem.value.text,
+                    text = todoItem.value.text,
                     deadline = todoItem.value.deadline,
                     importance = todoItem.value.importance,
-                    isDone = if (todoItem.value.id.isEmpty()){
+                    isDone = if (todoItem.value.id.isEmpty()) {
                         false
                     } else {
                         todoItem.value.isDone
                     },
-                    createdAt = if (todoItem.value.id.isEmpty()){
+                    createdAt = if (todoItem.value.id.isEmpty()) {
                         Date()
                     } else {
                         todoItem.value.createdAt
                     },
-                    updatedAt = if (todoItem.value.id.isEmpty()){
+                    updatedAt = if (todoItem.value.id.isEmpty()) {
                         null
                     } else {
                         Date()
@@ -97,7 +97,7 @@ class AddScreenViewModel @Inject constructor(
         }
     }
 
-    fun deleteItem(){
+    fun deleteItem() {
         runSafeInBackground {
             repository.deleteToDo(todoItem.value.id)
         }

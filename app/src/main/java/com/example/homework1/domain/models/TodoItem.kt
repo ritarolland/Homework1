@@ -1,8 +1,12 @@
 package com.example.homework1.domain.models
 
+import androidx.room.Entity
 import java.util.Date
+import androidx.room.PrimaryKey
 
+@Entity(tableName = "todo_items")
 data class TodoItem(
+    @PrimaryKey
     val id: String = "",
     val text: String = "",
     val importance: Importance = Importance.NORMAL,

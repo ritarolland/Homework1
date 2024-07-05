@@ -65,7 +65,10 @@ fun MainScreenContent(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navigateToAdd(null) },
+                onClick = {
+                    addScreenViewModel.getItemById(null)
+                    navigateToAdd(null)
+                          },
                 containerColor = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier
                     .clip(CircleShape)
@@ -110,7 +113,6 @@ fun MainScreenContent(
                             .fillMaxWidth()
                             .height(52.dp)
                             .padding(horizontal = 52.dp, vertical = 8.dp)
-
                     )
                 }
             }

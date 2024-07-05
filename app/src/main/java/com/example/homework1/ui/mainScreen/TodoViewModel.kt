@@ -3,20 +3,25 @@ package com.example.homework1.ui.mainScreen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.homework1.data.TodoItemsRepository
+import com.example.homework1.data.TodoItemsRepositoryImpl
 import com.example.homework1.domain.models.TodoItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class TodoViewModel @Inject constructor(
-    private val repository: TodoItemsRepository
+    private val repository: TodoItemsRepositoryImpl
 ) : ViewModel() {
 
     private val todoItems = MutableStateFlow<List<TodoItem>>(emptyList())
+
 
     private val _mainScreenUiModel = MutableStateFlow(MainScreenUiModel())
     val mainScreenUiModel = _mainScreenUiModel.asStateFlow()
