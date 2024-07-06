@@ -2,6 +2,8 @@ package com.example.homework1.domain.models
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
@@ -10,6 +12,9 @@ import kotlinx.coroutines.flow.Flow
 interface TodoItemDao {
     @Query("SELECT * FROM todo_items")
     fun getAll(): Flow<List<TodoItem>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(items: List<TodoItem>)
 
     @Query("UPDATE todo_items SET isDone = :isDone WHERE id = :id")
     suspend fun updateChecked(id: String, isDone: Boolean)

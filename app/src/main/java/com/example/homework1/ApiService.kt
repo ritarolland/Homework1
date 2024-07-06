@@ -1,23 +1,39 @@
 package com.example.homework1
 
 import com.example.homework1.domain.models.TodoItem
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
-    @GET("tasks")
-    suspend fun getTasks(): List<TodoItem>
+    @GET("list")
+    suspend fun getAll(): Response<GetTodoListResponse>
 
-    @POST("tasks")
-    suspend fun addTask(@Body task: TodoItem)
+    @PATCH("list")
+    suspend fun updateList(
+        @Header("X-Last-Known-Revision") revision: String,
+        @Body items: List<TodoItem>
+    ): Response<GetTodoListResponse>
 
-    @PUT("tasks/{id}")
-    suspend fun updateTask(@Path("id") id: String, @Body task: TodoItem)
+    @GET("list/{id}")
+    suspend fun getToDoItemById(@Path("id") id: String): Response<GetSingleTodoResponse>
 
-    @DELETE("tasks/{id}")
-    suspend fun deleteTask(@Path("id") id: String)
+    @POST("list")
+    suspend fun addToDoItem(@Body request: UpdateSingleTodoRequest): Response<GetSingleTodoResponse>
+
+    @PUT("list/{id}")
+    suspend fun upsertTodo(
+        @Path("id") id: String,
+        @Body request: UpdateSingleTodoRequest
+    ): Response<GetSingleTodoResponse>
+
+    @DELETE("list/{id}")
+    suspend fun deleteTodo(@Path("id") id: String): Response<GetTodoListResponse>
 }
